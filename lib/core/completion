@@ -1,0 +1,41 @@
+#
+# bash/zsh completion for tutu utility for tutu
+#
+# Distributed under the GNU General Public License, version 2.0.
+#
+
+if [[ -n $ZSH_VERSION ]]; then
+    # Only load/call compinit once.
+    if [[ -z $_comp_dumpfile ]]; then
+        autoload -U compinit
+        compinit
+    fi
+    # Only load/call bashcompinit once.
+    if [[ -z $functions[complete] ]]; then
+        autoload -U +X bashcompinit && bashcompinit
+    fi
+fi
+
+function _tutu_completion() {
+    COMPREPLY=()
+
+    local cur="${COMP_WORDS[COMP_CWORD]}"
+    local prev="${COMP_WORDS[COMP_CWORD-1]}"
+   
+    typeset -a mywords
+
+    if [[ $COMP_CWORD == 1 ]]; then
+        typeset -a switches=( "--help" "--refresh" "--list" )
+        typeset -a targets=($(_tutu_list_targets))
+        mywords=( ${switches[*]} ${targets[*]} ); 
+    fi
+
+    COMPREPLY=( $(compgen -W "${mywords[*]}" -- "$cur") )
+    echo ${COMPREPLY}
+}
+
+complete -o bashdefault -o default -F _tutu_completion tutu 2>/dev/null \
+    || complete -o default -F _tutu_completion tutu
+
+complete -o bashdefault -o default -F _tutu_completion tu 2>/dev/null \
+    || complete -o default -F _tutu_completion tu

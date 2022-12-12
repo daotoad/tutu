@@ -1,0 +1,33 @@
+function {
+    local BASE_DIR=${TUTU_BASE_DIR:=$HOME/.tutu}
+    local CORE_DIR=$BASE_DIR/lib/core
+
+    declare -a required_files=(
+       tutu
+       completion
+    );
+
+    declare -a optional_files=(
+    );
+
+    local error=0
+    for required in $required_files; do
+        full_path=$CORE_DIR/$required
+        if [[ -f $full_path ]]; then
+            echo "Loading $full_path";
+            source $full_path
+        else
+            echo "Required file: '$full_path' is missing."
+            echo 'tutu not installed yet!  Run "make install" or follow the README instructions'
+            error=1; 
+        fi
+    done
+
+    for optional in $optional_files; do
+        if [[ !error && -f $optional ]]; then
+            echo "Loading $full_path";
+            source $optional
+        fi
+    done
+}
+

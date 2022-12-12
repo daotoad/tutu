@@ -1,0 +1,127 @@
+#!/bin/zsh
+
+# =====================================
+# Support functions
+# =====================================
+typeset -Ax TUTU_TARGET_LIST=();
+typeset -Ax TUTU_TARGET_LIST_RAW
+
+function _tutu_base_dir {
+    echo ${TUTU_BASE_DIR:=~/.tutu}
+}
+
+function _tutu_target_path {
+    echo "$(_tutu_base_dir)/${TUTU_TARGETS:=targets}";
+}
+
+function _tutu_load_targets {
+    target_file_path="$(_tutu_target_path)";
+    echo "Loading target list from ${target_file_path}";
+    TUTU_TARGET_LIST=();
+    TUTU_TARGET_LIST_RAW=();
+    while read name target_path; do
+        echo "Adding: '${name}' => '${target_path}'"
+        TUTU_TARGET_LIST[$name]=${~target_path};
+        TUTU_TARGET_LIST_RAW[$name]=${target_path};
+    done < "$target_file_path";
+}
+
+function _tutu_cache_targets {
+    # TODO - add mod time checks
+    if [ ${#TUTU_TARGET_LIST[@]} -eq 0 ]; then
+        _tutu_load_targets > /dev/null
+    fi
+}
+ 
+function _tutu_list_targets {
+    _tutu_cache_targets
+    typeset -a targets
+    targets=(${(k)TUTU_TARGET_LIST[@]})
+
+    echo "${targets[*]}";
+}
+ 
+function _tutu_resolve_target {
+    _tutu_cache_targets
+    echo $TUTU_TARGET_LIST[$1];
+}
+
+
+# =====================================
+# Primarty functions
+# =====================================
+
+function _tutu() {
+    local tu_command="$1"; shift;
+    local target="$1";
+    case $target in
+        -h|  --help) _tutu_usage         "$@";;
+        -l|  --list) _tutu_list          "$@";;
+        -r|-refresh) _tutu_load_targets  "$@";;
+                  *) _tutu_jump          "$tu_command" "$@";;
+    esac;
+}
+
+function _tutu_usage () {
+    local usage=<<END_USAGE
+Usage: tu/tutu ( -help | -list  ) [args]"
+
+Jump to a directory using a short name.
+
+tu <target name>    cd to target directory
+tutu <target name>  pushd to target directory
+
+tu --list           reload targets definition file
+tu --refresh        reload targets definition file
+tu --help           display this message
+
+untu is aliased to popd
+
+CONFIGURATION
+
+All configuration is kept in the \$TUTU_BASE_DIR which defaults to "~/.tutu".
+
+Targets are specified in \$TUTU_TARGETS file in the configuration directory.
+\$TUTU_TARGETS defaults to "targets".
+
+Target lists should be written in two columns, with the first column denoting the
+name of the target and the second column denoting the target path.
+
+For example:
+
+  myTarget     ~/some/path/here
+  another      /different/path/here
+
+END_USAGE
+    echo $usage;
+}
+
+function _tutu_list () {
+   local targets=($(_tutu_list_targets))
+
+    for target in $targets; do
+        echo "$target";
+    done;
+}
+
+function _tutu_jump {
+    local command=$1; shift;
+    local target=$(_tutu_resolve_target "$1");
+
+    if [[ -z $target ]]; then
+        echo "Target '$1' not defined. Use one of $(_tutu_list_targets)"
+    else
+        echo "($1) => $command $target"
+        $command "$target"
+    fi
+}
+
+# =====================================
+# Interface functions
+# =====================================
+
+function tu { _tutu "cd" $@ }
+function tutu { _tutu "pushd" $@ }
+function untu  { popd }
+
+return 0;
