@@ -20,6 +20,11 @@ function _tutu_load_targets {
     TUTU_TARGET_LIST=();
     TUTU_TARGET_LIST_RAW=();
     while read name target_path; do
+        # Skip comments
+        if [[ "$name" =~ ^\s*\# ]]; then
+          continue;
+        fi
+
         echo "Adding: '${name}' => '${target_path}'"
         TUTU_TARGET_LIST[$name]=${~target_path};
         TUTU_TARGET_LIST_RAW[$name]=${target_path};
@@ -57,6 +62,7 @@ function _tutu() {
     case $target in
         -h|  --help) _tutu_usage         "$@";;
         -l|  --list) _tutu_list          "$@";;
+        -p|  --path) _tutu_path          "$@";;
         -r|-refresh) _tutu_load_targets  "$@";;
                   *) _tutu_jump          "$tu_command" "$@";;
     esac;
@@ -74,6 +80,7 @@ tutu <target name>  pushd to target directory
 tu --list           reload targets definition file
 tu --refresh        reload targets definition file
 tu --help           display this message
+tu --path           print the path instead of navigating
 
 untu is aliased to popd
 
@@ -102,6 +109,17 @@ function _tutu_list () {
     for target in $targets; do
         echo "$target";
     done;
+}
+
+function _tutu_path () {
+    shift;
+    local target=$(_tutu_resolve_target "$1");
+
+    if [[ -z $target ]]; then
+        echo "Target '$1' not defined. Use one of $(_tutu_list_targets)"
+    else
+        echo "$target"
+    fi
 }
 
 function _tutu_jump {

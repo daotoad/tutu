@@ -21,13 +21,19 @@ function _tutu_completion() {
 
     local cur="${COMP_WORDS[COMP_CWORD]}"
     local prev="${COMP_WORDS[COMP_CWORD-1]}"
-   
+
     typeset -a mywords
 
     if [[ $COMP_CWORD == 1 ]]; then
-        typeset -a switches=( "--help" "--refresh" "--list" )
+        typeset -a switches=( "--help" "--refresh" "--list" "--path" )
         typeset -a targets=($(_tutu_list_targets))
-        mywords=( ${switches[*]} ${targets[*]} ); 
+        mywords=( ${switches[*]} ${targets[*]} );
+    elif [[ $COMP_CWORD == 2 ]]; then
+
+      if [[ $prev == '--path' || $prev == '-p' ]]; then
+        typeset -a targets=($(_tutu_list_targets))
+        mywords=( ${targets[*]} );
+      fi
     fi
 
     COMPREPLY=( $(compgen -W "${mywords[*]}" -- "$cur") )
