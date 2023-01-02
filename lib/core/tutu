@@ -61,28 +61,62 @@ function _tutu() {
     local target="$1";
     case $target in
         -h|  --help) _tutu_usage         "$@";;
+
+        -a|  --add)  _tutu_add           "$@";;
+        -e|  --edit) _tutu_edit          "$@";;
         -l|  --list) _tutu_list          "$@";;
         -p|  --path) _tutu_path          "$@";;
         -r|-refresh) _tutu_load_targets  "$@";;
+
                   *) _tutu_jump          "$tu_command" "$@";;
     esac;
 }
 
 function _tutu_usage () {
-    local usage=<<END_USAGE
-Usage: tu/tutu ( -help | -list  ) [args]"
+
+    read -r -d '' usage <<END_USAGE
+
+Usage: tu/tutu ( --help | --list  ) [args]"
 
 Jump to a directory using a short name.
 
-tu <target name>    cd to target directory
-tutu <target name>  pushd to target directory
+COMMANDS
 
-tu --list           reload targets definition file
-tu --refresh        reload targets definition file
-tu --help           display this message
-tu --path           print the path instead of navigating
+    tu <target name>
 
-untu is aliased to popd
+        cd to target directory
+
+    tutu <target name>
+
+        pushd to target directory
+
+    tu --path <target name>
+
+        print the path instead of navigating
+
+    tu --add <target name> <target path>
+
+        Add a new target to the targets file.
+
+        The target path argument is optional and defaults to the current 
+        working directory.
+
+    tu --list
+
+        list the defined targets
+
+    tu --edit
+
+        open the targets file in your shell editor
+
+    tu --help
+
+        display this message
+
+    untu
+
+        syntactic sugar for popd
+
 
 CONFIGURATION
 
@@ -98,9 +132,36 @@ For example:
 
   myTarget     ~/some/path/here
   another      /different/path/here
-
 END_USAGE
-    echo $usage;
+
+    echo $usage "\n";
+}
+
+function _tutu_add () {
+    shift; # Skip the --add
+
+    local target_name=$1; shift;
+    local target_path=${1:=$(pwd)}
+
+    if [[ -z $target_path ]]; then
+        echo "Please provide a target name and an optional path."
+        return
+    fi
+
+    local target=$(_tutu_resolve_target "$target_name");
+    if [[ ! -z $target ]]; then
+        echo "Target '$target_name' already defined as '$target'"
+        return
+    fi
+
+    echo "Adding '$target_name'..."
+    echo $target_name $target_path >> $(_tutu_target_path)
+}
+
+function _tutu_edit () {
+    local editor=${VISUAL:-${EDITOR:-vi}}
+
+    $editor $(_tutu_target_path)
 }
 
 function _tutu_list () {
@@ -141,5 +202,4 @@ function _tutu_jump {
 function tu { _tutu "cd" $@ }
 function tutu { _tutu "pushd" $@ }
 function untu  { popd }
-
 return 0;

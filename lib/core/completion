@@ -25,9 +25,10 @@ function _tutu_completion() {
     typeset -a mywords
 
     if [[ $COMP_CWORD == 1 ]]; then
-        typeset -a switches=( "--help" "--refresh" "--list" "--path" )
+        typeset -a switches=( "--help" "--refresh" "--list" "--path" "--edit" "--add")
         typeset -a targets=($(_tutu_list_targets))
         mywords=( ${switches[*]} ${targets[*]} );
+
     elif [[ $COMP_CWORD == 2 ]]; then
 
       if [[ $prev == '--path' || $prev == '-p' ]]; then
