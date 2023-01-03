@@ -14,9 +14,8 @@ Tutu provides three commands:
 
 ## Installation
 
-1. Make sure you have smartcd installed.
-2. Clone this repo
-3. Run these commands:
+1. Clone this repo
+2. Run these commands:
 
   make install
   mkdir -p $HOME/tutu/tools
