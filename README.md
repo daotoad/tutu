@@ -17,11 +17,11 @@ Tutu provides three commands:
 1. Clone this repo
 2. Run these commands:
 
+```
   make install
-  mkdir -p $HOME/tutu/tools
-  mkdir -p $HOME/tutu/src
   load_tutu
   echo '[ -r "$HOME/.tutu/load_tutu" ] && source ~/.tutu/load_tutu' >> $HOME/.zshrc
+```
 
 ## Managing the target list
 
