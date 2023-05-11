@@ -19,7 +19,7 @@ Tutu provides three commands:
 
 ```
   make install
-  load_tutu
+  source load_tutu
   echo '[ -r "$HOME/.tutu/load_tutu" ] && source ~/.tutu/load_tutu' >> $HOME/.zshrc
 ```
 
