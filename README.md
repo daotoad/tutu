@@ -59,3 +59,9 @@ For example, based on the targets file above, `tu my-bin` is equivalent to `push
 The `untu` command is an alias for `popd`.  It is purely syntactic sugar and does not add any additonal capabilities.
 
 
+
+# Acknowledgements
+
+While `tutu` is entirely my own work, much of the project layout was mercilessly cribbed from what is used in the excellent [`smartcd`][smartcd] by Dave Olszewski.  Any leftover cruft from my outright banditry is entirely on me.
+
+[smartcd]: https://github.com/cxreg/smartcd
