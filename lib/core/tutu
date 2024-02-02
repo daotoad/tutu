@@ -71,6 +71,21 @@ function _tutu_resolve_target {
     echo $TUTU_TARGET_LIST[$1];
 }
 
+function _tutu_resolve_targets_from_path {
+    _tutu_cache_targets
+    wanted_path=$1;
+
+    typeset -a MATCHES=();
+    for target target_path in "${(@kv)TUTU_TARGET_LIST}"; do
+        if [[ $wanted_path == $target_path ]]; then
+        echo " =====> $target <========\n"
+            MATCHES+=$target
+        fi
+    done
+
+    echo "${targets[*]}";
+}
+
 
 # =====================================
 # Primarty functions
@@ -93,6 +108,7 @@ function _tutu() {
         -l|    --list) _tutu_list      "$@";;
         -p|    --path) _tutu_path      "$@";;
         -r| --refresh) _tutu_refresh   "$@";;
+        -w|   --which) _tutu_which     "$@";;
 
                   *) _tutu_jump        "$tu_command" "$@";;
     esac;
@@ -217,6 +233,13 @@ function _tutu_path () {
     else
         echo "$target"
     fi
+}
+
+function _tutu_which () {
+    
+    local wanted_path=$(pwd);
+    typeset -a targets=($(_tutu_resolve_targets_from_path "$wanted_path"))
+    echo "${targets[*]}"
 }
 
 function _tutu_jump {
